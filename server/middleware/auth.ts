@@ -1,13 +1,13 @@
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
-import type { AdminIdentity } from "../../shared/contracts";
-import { env } from "../lib/config";
+import type { AdminIdentity } from "../../shared/contracts.js";
+import { env } from "../lib/config.js";
 import {
   getBypassCookieName,
   isLocalRequest,
   verifyLocalBypassToken,
-} from "../lib/local-bypass-auth";
-import { serviceSupabase } from "../lib/supabase";
+} from "../lib/local-bypass-auth.js";
+import { serviceSupabase } from "../lib/supabase.js";
 
 function parseCookieHeader(cookieHeader: string | undefined): Record<string, string> {
   if (!cookieHeader) {

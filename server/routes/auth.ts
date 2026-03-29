@@ -1,15 +1,15 @@
 import { Hono } from "hono";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { z } from "zod";
-import type { AuthVariables } from "../middleware/auth";
-import { requireAdmin } from "../middleware/auth";
-import { env } from "../lib/config";
+import type { AuthVariables } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/auth.js";
+import { env } from "../lib/config.js";
 import {
   createLocalBypassToken,
   getBypassCookieName,
   isLocalRequest,
-} from "../lib/local-bypass-auth";
-import { anonSupabase } from "../lib/supabase";
+} from "../lib/local-bypass-auth.js";
+import { anonSupabase } from "../lib/supabase.js";
 
 const magicLinkSchema = z.object({
   email: z.string().email(),

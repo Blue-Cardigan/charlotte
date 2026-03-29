@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { Resend } from "resend";
-import { extractStructuredAnswers } from "../lib/response-extractor";
-import { env } from "../lib/config";
-import { serviceSupabase } from "../lib/supabase";
+import { extractStructuredAnswers } from "../lib/response-extractor.js";
+import { env } from "../lib/config.js";
+import { serviceSupabase } from "../lib/supabase.js";
 
 const resend = new Resend(env.RESEND_API_KEY);
 const sessionsApp = new Hono();

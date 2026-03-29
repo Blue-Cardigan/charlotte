@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { AuthVariables } from "../middleware/auth";
-import { requireAdmin } from "../middleware/auth";
-import { serviceSupabase } from "../lib/supabase";
+import type { AuthVariables } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/auth.js";
+import { serviceSupabase } from "../lib/supabase.js";
 
 const questionSchema = z.object({
   survey_id: z.string().uuid(),

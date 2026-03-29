@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import type { SurveyBundle } from "../../shared/contracts";
-import type { AuthVariables } from "../middleware/auth";
-import { requireAdmin } from "../middleware/auth";
-import { serviceSupabase } from "../lib/supabase";
+import type { SurveyBundle } from "../../shared/contracts.js";
+import type { AuthVariables } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/auth.js";
+import { serviceSupabase } from "../lib/supabase.js";
 
 const surveySchema = z.object({
   brand_id: z.string().uuid(),

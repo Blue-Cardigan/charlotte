@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { SurveyQuestion } from "../../shared/contracts";
-import { env } from "./config";
+import type { SurveyQuestion } from "../../shared/contracts.js";
+import { env } from "./config.js";
 
 const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
 

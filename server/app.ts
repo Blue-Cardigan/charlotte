@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { authApp } from "./routes/auth";
-import { brandsApp } from "./routes/brands";
-import { surveysApp } from "./routes/surveys";
-import { questionsApp } from "./routes/questions";
-import { signedUrlApp } from "./routes/signed-url";
-import { sessionsApp } from "./routes/sessions";
-import { responsesApp } from "./routes/responses";
-import { env } from "./lib/config";
+import { authApp } from "./routes/auth.js";
+import { brandsApp } from "./routes/brands.js";
+import { surveysApp } from "./routes/surveys.js";
+import { questionsApp } from "./routes/questions.js";
+import { signedUrlApp } from "./routes/signed-url.js";
+import { sessionsApp } from "./routes/sessions.js";
+import { responsesApp } from "./routes/responses.js";
+import { env } from "./lib/config.js";
 
 const app = new Hono().basePath("/api");
 

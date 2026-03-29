@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import type { AuthVariables } from "../middleware/auth";
-import { requireAdmin } from "../middleware/auth";
-import { serviceSupabase } from "../lib/supabase";
+import type { AuthVariables } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/auth.js";
+import { serviceSupabase } from "../lib/supabase.js";
 
 const responsesApp = new Hono<{ Variables: AuthVariables }>();
 responsesApp.use("*", requireAdmin);

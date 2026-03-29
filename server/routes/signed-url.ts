@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { buildSurveyPrompt } from "../lib/prompt-builder";
-import { env } from "../lib/config";
-import { serviceSupabase } from "../lib/supabase";
+import { buildSurveyPrompt } from "../lib/prompt-builder.js";
+import { env } from "../lib/config.js";
+import { serviceSupabase } from "../lib/supabase.js";
 
 const signedUrlApp = new Hono();
 

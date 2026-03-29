@@ -1,4 +1,4 @@
-import type { Brand, Survey, SurveyQuestion } from "../../shared/contracts";
+import type { Brand, Survey, SurveyQuestion } from "../../shared/contracts.js";
 
 interface PromptPayload {
   brand: Brand;

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 import { useSurvey } from "../../hooks/useSurvey";
 import { useBrandTheme } from "../../hooks/useBrandTheme";
@@ -45,9 +45,6 @@ export function WelcomePage() {
             Okay, let's go
           </button>
         </div>
-        <Link to="/admin" className="muted" style={{ fontSize: 14 }}>
-          Admin login
-        </Link>
       </div>
     </ThemeProvider>
   );

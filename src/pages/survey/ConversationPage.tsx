@@ -26,8 +26,9 @@ export function ConversationPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [started, setStarted] = useState(false);
+  const [autoStartAttempted, setAutoStartAttempted] = useState(false);
 
-  const { mode, error, messages, transcript, conversationId, start, stop, addFallbackUserMessage } =
+  const { mode, error, messages, liveAssistantText, transcript, conversationId, start, stop, addFallbackUserMessage } =
     useConversation();
   const trackingQuery = getTrackingQueryString(searchParams);
 
@@ -35,6 +36,7 @@ export function ConversationPage() {
     if (!payload) {
       return;
     }
+    setAutoStartAttempted(true);
     setConnecting(true);
     try {
       const sourcePayload = getSourceTrackingPayload(searchParams, location.pathname);
@@ -62,10 +64,16 @@ export function ConversationPage() {
   }, [payload, start, searchParams, location.pathname]);
 
   useEffect(() => {
-    if (payload && !started && !connecting) {
+    if (payload && !started && !connecting && !autoStartAttempted) {
       void startConversation();
     }
-  }, [payload, started, connecting, startConversation]);
+  }, [payload, started, connecting, autoStartAttempted, startConversation]);
+
+  useEffect(() => {
+    return () => {
+      void stop();
+    };
+  }, [stop]);
 
   const endConversation = useCallback(async () => {
     if (!sessionId) {
@@ -99,15 +107,41 @@ export function ConversationPage() {
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Talk with {payload.brand.persona_name}</h2>
           <p className="muted">Mode: {mode}</p>
+          {connecting ? (
+            <p className="muted" style={{ marginTop: 6 }}>
+              Starting voice...
+            </p>
+          ) : null}
+          {!connecting && !started && !error ? (
+            <p className="muted" style={{ marginTop: 6 }}>
+              Voice should start automatically. If it does not, tap Retry audio.
+            </p>
+          ) : null}
           {trackingQuery ? (
             <p className="muted" style={{ fontSize: 12 }}>
               Source tracking active
             </p>
           ) : null}
           {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
+          {error && !connecting ? (
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => {
+                setAutoStartAttempted(false);
+              }}
+            >
+              Retry audio
+            </button>
+          ) : null}
           <div style={{ marginTop: 18, minHeight: 220, display: "grid", placeItems: "center" }}>
             {mode === "speaking" ? <CharlotteWaveform /> : <MicrophoneOrb active={mode === "listening"} />}
           </div>
+          {liveAssistantText ? (
+            <p className="muted" style={{ marginTop: 8 }}>
+              {payload.brand.persona_name}: {liveAssistantText}
+            </p>
+          ) : null}
           <button type="button" className="button-secondary" onClick={() => void endConversation()}>
             End and continue
           </button>

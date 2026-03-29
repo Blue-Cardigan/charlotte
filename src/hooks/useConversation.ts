@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Conversation } from "@elevenlabs/client";
 
 type Mode = "idle" | "listening" | "speaking" | "ended" | "error";
@@ -24,15 +24,39 @@ export function useConversation() {
   const [messages, setMessages] = useState<MessageEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [liveAssistantText, setLiveAssistantText] = useState("");
+  const sessionRef = useRef<ConversationSession | null>(null);
+  const liveAssistantTextRef = useRef("");
 
   const appendMessage = useCallback((message: MessageEntry) => {
     setMessages((prev) => [...prev, message]);
   }, []);
 
+  const flushLiveAssistantText = useCallback(() => {
+    const text = liveAssistantTextRef.current.trim();
+    if (!text) {
+      return;
+    }
+    appendMessage({
+      role: "assistant",
+      text,
+      timestamp: Date.now(),
+    });
+    liveAssistantTextRef.current = "";
+    setLiveAssistantText("");
+  }, [appendMessage]);
+
   const start = useCallback(
     async ({ signedUrl, overrides }: StartSessionInput) => {
       setError(null);
       setMode("listening");
+      setConversationId(null);
+      liveAssistantTextRef.current = "";
+      setLiveAssistantText("");
+      const existingSession = sessionRef.current;
+      if (existingSession) {
+        await existingSession.endSession().catch(() => undefined);
+      }
       const created = await Conversation.startSession({
         signedUrl,
         overrides,
@@ -45,6 +69,9 @@ export function useConversation() {
           });
         },
         onDisconnect: () => {
+          flushLiveAssistantText();
+          sessionRef.current = null;
+          setSession(null);
           setMode("ended");
         },
         onError: (payload: unknown) => {
@@ -63,33 +90,98 @@ export function useConversation() {
           if (!payload || typeof payload !== "object") {
             return;
           }
-          const candidate = payload as {
-            source?: "ai" | "user";
-            message?: string;
-          };
-          if (!candidate.message) {
+          const event = payload as Record<string, unknown>;
+          const type = typeof event.type === "string" ? event.type : "";
+
+          if (type === "agent_chat_response_part") {
+            const part = event.text_response_part as { text?: string; type?: "start" | "delta" | "stop" } | undefined;
+            if (!part) {
+              return;
+            }
+            const text = part.text ?? "";
+            if (part.type === "start") {
+              liveAssistantTextRef.current = text;
+              setLiveAssistantText(text);
+              return;
+            }
+            if (part.type === "delta") {
+              liveAssistantTextRef.current += text;
+              setLiveAssistantText(liveAssistantTextRef.current);
+              return;
+            }
+            if (part.type === "stop") {
+              flushLiveAssistantText();
+            }
             return;
           }
-          appendMessage({
-            role: candidate.source === "user" ? "user" : "assistant",
-            text: candidate.message,
-            timestamp: Date.now(),
-          });
+
+          if (type === "agent_response") {
+            const responseEvent = event.agent_response_event as { agent_response?: string } | undefined;
+            const text = responseEvent?.agent_response?.trim();
+            if (!text) {
+              return;
+            }
+            const liveText = liveAssistantTextRef.current.trim();
+            if (!liveText) {
+              appendMessage({
+                role: "assistant",
+                text,
+                timestamp: Date.now(),
+              });
+            } else if (liveText !== text) {
+              appendMessage({
+                role: "assistant",
+                text,
+                timestamp: Date.now(),
+              });
+              liveAssistantTextRef.current = "";
+              setLiveAssistantText("");
+            }
+            return;
+          }
+
+          if (type === "user_transcript") {
+            const userEvent = event.user_transcription_event as { user_transcript?: string } | undefined;
+            const text = userEvent?.user_transcript?.trim();
+            if (!text) {
+              return;
+            }
+            appendMessage({
+              role: "user",
+              text,
+              timestamp: Date.now(),
+            });
+            return;
+          }
+
+          // Backward compatibility with older payload shape.
+          const legacy = event as { source?: "ai" | "user"; message?: string };
+          if (legacy.message) {
+            appendMessage({
+              role: legacy.source === "user" ? "user" : "assistant",
+              text: legacy.message,
+              timestamp: Date.now(),
+            });
+          }
         },
       });
+      sessionRef.current = created;
       setSession(created);
     },
-    [appendMessage],
+    [appendMessage, flushLiveAssistantText],
   );
 
   const stop = useCallback(async () => {
-    if (!session) {
+    const activeSession = sessionRef.current;
+    if (!activeSession) {
       return;
     }
-    await session.endSession();
+    await activeSession.endSession().catch(() => undefined);
+    flushLiveAssistantText();
+    sessionRef.current = null;
     setSession(null);
     setMode("ended");
-  }, [session]);
+  }, [flushLiveAssistantText]);
 
   const addFallbackUserMessage = useCallback((text: string) => {
     appendMessage({
@@ -114,6 +206,7 @@ export function useConversation() {
     error,
     conversationId,
     messages,
+    liveAssistantText,
     transcript,
     start,
     stop,

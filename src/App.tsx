@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { WelcomePage } from "./pages/survey/WelcomePage";
 import { ConversationPage } from "./pages/survey/ConversationPage";
 import { ThankYouPage } from "./pages/survey/ThankYouPage";
@@ -31,21 +31,14 @@ function SurveyParamRedirect() {
   };
 
   return (
-    <div className="mobile-frame">
-      <div className="card" style={{ marginTop: "auto" }}>
+    <div className="mobile-frame" style={{ justifyContent: "center" }}>
+      <div className="card">
         <h1 style={{ marginTop: 0, marginBottom: 8 }}>Something went wrong</h1>
         <p className="muted" style={{ lineHeight: 1.55 }}>
           We could not find a valid survey in this link. Please go back to where you found the invite and open the
           original link again.
         </p>
       </div>
-
-      <p className="muted" style={{ marginTop: 0, fontSize: 13, textAlign: "center", opacity: 0.8 }}>
-        For team admins:{" "}
-        <Link to="/admin" style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>
-          Sign in
-        </Link>
-      </p>
     </div>
   );
 }

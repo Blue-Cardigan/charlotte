@@ -28,8 +28,8 @@ export function ThankYouPage() {
   };
 
   return (
-    <div className="mobile-frame">
-      <div className="card" style={{ marginTop: "auto" }}>
+    <div className="mobile-frame" style={{ justifyContent: "center" }}>
+      <div className="card">
         <h1>Thank you</h1>
         <p className="muted">Your voice responses have been captured.</p>
 

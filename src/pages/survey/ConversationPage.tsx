@@ -33,6 +33,7 @@ export function ConversationPage() {
   const { state, payload } = useSurvey(slug ?? null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [ending, setEnding] = useState(false);
   const [started, setStarted] = useState(false);
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
   const [inputMode, setInputMode] = useState<"voice" | "text">("voice");
@@ -108,21 +109,32 @@ export function ConversationPage() {
   }, [outputMode, setOutputMuted]);
 
   const endConversation = useCallback(async () => {
-    if (!sessionId) {
+    if (!sessionId || ending) {
       return;
     }
-    await stop();
-    await apiFetch(`/api/sessions/${sessionId}/complete`, {
-      method: "POST",
-      body: JSON.stringify({
-        transcript,
-        elevenlabs_conversation_id: conversationId ?? undefined,
-      }),
-    });
-    const thanksParams = new URLSearchParams(searchParams);
-    thanksParams.set("session", sessionId);
-    navigate(`/survey/${slug}/thanks?${thanksParams.toString()}`);
-  }, [sessionId, stop, transcript, conversationId, navigate, slug, searchParams]);
+    setEnding(true);
+    try {
+      await stop();
+      await apiFetch(`/api/sessions/${sessionId}/complete`, {
+        method: "POST",
+        body: JSON.stringify({
+          transcript,
+          elevenlabs_conversation_id: conversationId ?? undefined,
+        }),
+      });
+      const thanksParams = new URLSearchParams(searchParams);
+      thanksParams.set("session", sessionId);
+      navigate(`/survey/${slug}/thanks?${thanksParams.toString()}`);
+    } catch {
+      setEnding(false);
+    }
+  }, [sessionId, ending, stop, transcript, conversationId, navigate, slug, searchParams]);
+
+  useEffect(() => {
+    if (mode === "ended" && sessionId && !ending) {
+      void endConversation();
+    }
+  }, [mode, sessionId, ending, endConversation]);
 
   const messagePreview = useMemo(() => messages.slice(-5), [messages]);
 
@@ -258,8 +270,8 @@ export function ConversationPage() {
               {payload.brand.persona_name}: {sanitizeTranscriptText(liveAssistantText)}
             </p>
           ) : null}
-          <button type="button" className="button-secondary" onClick={() => void endConversation()}>
-            End and continue
+          <button type="button" className="button-secondary" onClick={() => void endConversation()} disabled={ending}>
+            {ending ? "Finishing..." : "End and continue"}
           </button>
         </div>
 

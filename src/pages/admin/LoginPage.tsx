@@ -59,8 +59,8 @@ export function LoginPage() {
   };
 
   return (
-    <div className="mobile-frame">
-      <div className="card" style={{ marginTop: "auto" }}>
+    <div className="mobile-frame" style={{ justifyContent: "center" }}>
+      <div className="card">
         <h1>Admin Login</h1>
         <p className="muted">
           Enter your admin email. On localhost, the configured admin email signs in directly; otherwise we send a

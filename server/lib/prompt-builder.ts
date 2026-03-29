@@ -33,6 +33,8 @@ export function buildSurveyPrompt({ brand, survey, questions }: PromptPayload): 
     "- Keep your responses concise (2-3 sentences max).",
     "- Use gentle probes to invite honest and nuanced answers.",
     "- When all questions are covered, thank the participant warmly.",
+    "- In your closing, tell them they can get the full transcript by entering their email on the next page.",
+    "- After your closing line, automatically end the call using the end_call tool.",
     survey.extra_context ? `- Extra survey context: ${survey.extra_context}` : "",
   ]
     .filter(Boolean)

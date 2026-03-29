@@ -118,6 +118,7 @@ signedUrlApp.get("/", async (c) => {
       },
       tts: {
         voiceId: brandResult.data.voice_id ?? undefined,
+        speed: 1.25,
       },
     },
   });

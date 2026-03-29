@@ -43,7 +43,7 @@ export async function extractStructuredAnswers(params: {
   transcript: unknown;
 }): Promise<ExtractResponse> {
   const { questions, transcript } = params;
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const candidateModels = ["gemini-2.5-flash", "gemini-1.5-flash"];
 
   const prompt = `
 Extract answers for each survey question from this transcript.
@@ -74,13 +74,26 @@ Transcript:
 ${JSON.stringify(transcript, null, 2)}
 `;
 
-  const response = await model.generateContent(prompt);
-  const text = response.response.text();
-  const cleaned = text
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/```$/i, "")
-    .trim();
+  let lastError: unknown = null;
 
-  return safeParseExtractResponse(cleaned);
+  for (const modelName of candidateModels) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const response = await model.generateContent(prompt);
+      const text = response.response.text();
+      const cleaned = text
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/```$/i, "")
+        .trim();
+      return safeParseExtractResponse(cleaned);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+  throw new Error("Failed to extract structured answers with available Gemini models.");
 }

@@ -17,6 +17,14 @@ interface SignedUrlResult {
   overrides?: ConversationOverrides;
 }
 
+function sanitizeTranscriptText(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\[[^\]]*]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function ConversationPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -27,8 +35,23 @@ export function ConversationPage() {
   const [connecting, setConnecting] = useState(false);
   const [started, setStarted] = useState(false);
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
+  const [inputMode, setInputMode] = useState<"voice" | "text">("voice");
+  const [outputMode, setOutputMode] = useState<"voice" | "text">("voice");
 
-  const { mode, error, messages, liveAssistantText, transcript, conversationId, start, stop, addFallbackUserMessage } =
+  const {
+    mode,
+    status,
+    error,
+    messages,
+    liveAssistantText,
+    transcript,
+    conversationId,
+    start,
+    stop,
+    setMicMuted,
+    setOutputMuted,
+    addFallbackUserMessage,
+  } =
     useConversation();
   const trackingQuery = getTrackingQueryString(searchParams);
 
@@ -75,6 +98,14 @@ export function ConversationPage() {
     };
   }, [stop]);
 
+  useEffect(() => {
+    setMicMuted(inputMode === "text");
+  }, [inputMode, setMicMuted]);
+
+  useEffect(() => {
+    setOutputMuted(outputMode === "text");
+  }, [outputMode, setOutputMuted]);
+
   const endConversation = useCallback(async () => {
     if (!sessionId) {
       return;
@@ -107,6 +138,7 @@ export function ConversationPage() {
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Talk with {payload.brand.persona_name}</h2>
           <p className="muted">Mode: {mode}</p>
+          <p className="muted">Connection: {status}</p>
           {connecting ? (
             <p className="muted" style={{ marginTop: 6 }}>
               Starting voice...
@@ -122,16 +154,50 @@ export function ConversationPage() {
               Source tracking active
             </p>
           ) : null}
+          <div style={{ display: "grid", gap: 10, marginTop: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <strong style={{ fontSize: 14 }}>Input</strong>
+              <button
+                type="button"
+                className={inputMode === "voice" ? "button-primary" : "button-secondary"}
+                onClick={() => setInputMode("voice")}
+              >
+                Voice
+              </button>
+              <button
+                type="button"
+                className={inputMode === "text" ? "button-primary" : "button-secondary"}
+                onClick={() => setInputMode("text")}
+              >
+                Text only
+              </button>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <strong style={{ fontSize: 14 }}>Output</strong>
+              <button
+                type="button"
+                className={outputMode === "voice" ? "button-primary" : "button-secondary"}
+                onClick={() => setOutputMode("voice")}
+              >
+                Voice
+              </button>
+              <button
+                type="button"
+                className={outputMode === "text" ? "button-primary" : "button-secondary"}
+                onClick={() => setOutputMode("text")}
+              >
+                Text only
+              </button>
+            </div>
+          </div>
           {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
-          {error && !connecting ? (
+          {!connecting && (!started || mode === "error" || mode === "ended") ? (
             <button
               type="button"
               className="button-secondary"
-              onClick={() => {
-                setAutoStartAttempted(false);
-              }}
+              onClick={() => void startConversation()}
             >
-              Retry audio
+              {started ? "Retry audio" : "Start voice"}
             </button>
           ) : null}
           <div style={{ marginTop: 18, minHeight: 220, display: "grid", placeItems: "center" }}>
@@ -139,7 +205,7 @@ export function ConversationPage() {
           </div>
           {liveAssistantText ? (
             <p className="muted" style={{ marginTop: 8 }}>
-              {payload.brand.persona_name}: {liveAssistantText}
+              {payload.brand.persona_name}: {sanitizeTranscriptText(liveAssistantText)}
             </p>
           ) : null}
           <button type="button" className="button-secondary" onClick={() => void endConversation()}>
@@ -152,13 +218,14 @@ export function ConversationPage() {
           {messagePreview.length === 0 ? <p className="muted">Waiting for the conversation to begin...</p> : null}
           {messagePreview.map((message) => (
             <p key={`${message.timestamp}-${message.role}`} style={{ marginBottom: 8 }}>
-              <strong>{message.role === "assistant" ? payload.brand.persona_name : "You"}:</strong> {message.text}
+              <strong>{message.role === "assistant" ? payload.brand.persona_name : "You"}:</strong>{" "}
+              {sanitizeTranscriptText(message.text)}
             </p>
           ))}
         </div>
 
         <TextFallbackInput
-          disabled={connecting}
+          disabled={connecting || status !== "connected"}
           onSubmit={async (text) => {
             addFallbackUserMessage(text);
           }}

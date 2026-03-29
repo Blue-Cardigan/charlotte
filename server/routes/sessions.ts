@@ -47,9 +47,18 @@ sessionsApp.post("/:id/complete", async (c) => {
     return c.json({ error: questionsResult.error.message }, 500);
   }
 
+  let extractionWarning: string | null = null;
   const extraction = await extractStructuredAnswers({
     questions: questionsResult.data ?? [],
     transcript: updateResult.data.transcript,
+  }).catch((error) => {
+    extractionWarning = error instanceof Error ? error.message : "Extraction failed";
+    return { answers: [] as Array<{
+      question_id: string;
+      extracted_answer: string;
+      raw_excerpt: string;
+      sentiment: "positive" | "neutral" | "negative";
+    }> };
   });
 
   if (extraction.answers.length > 0) {
@@ -67,7 +76,7 @@ sessionsApp.post("/:id/complete", async (c) => {
     }
   }
 
-  return c.json({ ok: true, answerCount: extraction.answers.length });
+  return c.json({ ok: true, answerCount: extraction.answers.length, extractionWarning });
 });
 
 sessionsApp.post("/:id/email", async (c) => {

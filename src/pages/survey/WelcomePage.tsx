@@ -12,6 +12,19 @@ export function WelcomePage() {
   const copy = useBrandTheme(payload?.brand ?? null);
   const trackingQuery = getTrackingQueryString(searchParams);
 
+  const beginSurvey = async () => {
+    // Requesting mic access on user gesture improves auto-start reliability in normal browsers.
+    if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+      } catch {
+        // We still navigate; chat page will show manual "Start voice" fallback.
+      }
+    }
+    navigate(`/survey/${payload?.survey.slug}/chat${trackingQuery}`);
+  };
+
   if (state.status === "loading") {
     return <div className="mobile-frame">Loading survey...</div>;
   }
@@ -40,7 +53,7 @@ export function WelcomePage() {
           <button
             type="button"
             className="button-primary"
-            onClick={() => navigate(`/survey/${payload.survey.slug}/chat${trackingQuery}`)}
+            onClick={() => void beginSurvey()}
           >
             Okay, let's go
           </button>

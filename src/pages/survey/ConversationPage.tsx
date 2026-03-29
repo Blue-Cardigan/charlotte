@@ -37,6 +37,7 @@ export function ConversationPage() {
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
   const [inputMode, setInputMode] = useState<"voice" | "text">("voice");
   const [outputMode, setOutputMode] = useState<"voice" | "text">("voice");
+  const [showTextOptions, setShowTextOptions] = useState(false);
 
   const {
     mode,
@@ -135,7 +136,84 @@ export function ConversationPage() {
   return (
     <ThemeProvider brand={payload.brand}>
       <div className="mobile-frame">
-        <div className="card">
+        <div className="card" style={{ position: "relative" }}>
+          <button
+            type="button"
+            className="button-secondary"
+            style={{
+              position: "absolute",
+              top: 14,
+              right: 14,
+              padding: "6px 10px",
+              fontSize: 12,
+              opacity: 0.85,
+            }}
+            onClick={() => setShowTextOptions((value) => !value)}
+          >
+            Text options
+          </button>
+          {showTextOptions ? (
+            <div
+              className="card"
+              style={{
+                position: "absolute",
+                top: 50,
+                right: 14,
+                width: 220,
+                padding: 12,
+                zIndex: 2,
+                display: "grid",
+                gap: 10,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <span className="muted" style={{ fontSize: 13 }}>
+                  Input
+                </span>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    type="button"
+                    className={inputMode === "voice" ? "button-primary" : "button-secondary"}
+                    style={{ padding: "5px 8px", fontSize: 12 }}
+                    onClick={() => setInputMode("voice")}
+                  >
+                    Voice
+                  </button>
+                  <button
+                    type="button"
+                    className={inputMode === "text" ? "button-primary" : "button-secondary"}
+                    style={{ padding: "5px 8px", fontSize: 12 }}
+                    onClick={() => setInputMode("text")}
+                  >
+                    Text
+                  </button>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <span className="muted" style={{ fontSize: 13 }}>
+                  Output
+                </span>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    type="button"
+                    className={outputMode === "voice" ? "button-primary" : "button-secondary"}
+                    style={{ padding: "5px 8px", fontSize: 12 }}
+                    onClick={() => setOutputMode("voice")}
+                  >
+                    Voice
+                  </button>
+                  <button
+                    type="button"
+                    className={outputMode === "text" ? "button-primary" : "button-secondary"}
+                    style={{ padding: "5px 8px", fontSize: 12 }}
+                    onClick={() => setOutputMode("text")}
+                  >
+                    Text
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
           <h2 style={{ marginTop: 0 }}>Talk with {payload.brand.persona_name}</h2>
           <p className="muted">Mode: {mode}</p>
           <p className="muted">Connection: {status}</p>
@@ -154,42 +232,14 @@ export function ConversationPage() {
               Source tracking active
             </p>
           ) : null}
-          <div style={{ display: "grid", gap: 10, marginTop: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <strong style={{ fontSize: 14 }}>Input</strong>
-              <button
-                type="button"
-                className={inputMode === "voice" ? "button-primary" : "button-secondary"}
-                onClick={() => setInputMode("voice")}
-              >
-                Voice
-              </button>
-              <button
-                type="button"
-                className={inputMode === "text" ? "button-primary" : "button-secondary"}
-                onClick={() => setInputMode("text")}
-              >
-                Text only
-              </button>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <strong style={{ fontSize: 14 }}>Output</strong>
-              <button
-                type="button"
-                className={outputMode === "voice" ? "button-primary" : "button-secondary"}
-                onClick={() => setOutputMode("voice")}
-              >
-                Voice
-              </button>
-              <button
-                type="button"
-                className={outputMode === "text" ? "button-primary" : "button-secondary"}
-                onClick={() => setOutputMode("text")}
-              >
-                Text only
-              </button>
-            </div>
-          </div>
+          {inputMode === "text" || outputMode === "text" ? (
+            <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+              Alternative mode active:
+              {inputMode === "text" ? " text input" : " voice input"}
+              {" / "}
+              {outputMode === "text" ? "text output" : "voice output"}
+            </p>
+          ) : null}
           {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
           {!connecting && (!started || mode === "error" || mode === "ended") ? (
             <button

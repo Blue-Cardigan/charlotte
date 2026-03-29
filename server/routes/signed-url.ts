@@ -57,6 +57,10 @@ signedUrlApp.get("/", async (c) => {
     survey: surveyResult.data,
     questions: questionsResult.data ?? [],
   });
+  const personaName = brandResult.data.persona_name;
+  const introLine = `Hey, I'm ${personaName}.`;
+  const welcomeBody = brandResult.data.welcome_body?.trim();
+  const firstMessage = welcomeBody ? `${introLine} ${welcomeBody}` : introLine;
 
   const elevenLabsAgentId = env.ELEVENLABS_AGENT_ID;
   if (!elevenLabsAgentId) {
@@ -112,13 +116,11 @@ signedUrlApp.get("/", async (c) => {
         prompt: {
           prompt,
         },
-        firstMessage:
-          brandResult.data.welcome_heading ??
-          `Hey, I am ${brandResult.data.persona_name}. Thanks for sharing your thoughts today.`,
+        firstMessage,
       },
       tts: {
         voiceId: brandResult.data.voice_id ?? undefined,
-        speed: 1.25,
+        speed: 1.2,
       },
     },
   });

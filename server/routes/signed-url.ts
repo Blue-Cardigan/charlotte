@@ -57,15 +57,18 @@ signedUrlApp.get("/", async (c) => {
     survey: surveyResult.data,
     questions: questionsResult.data ?? [],
   });
-  const personaName = brandResult.data.persona_name;
-  const introLine = `................. Hey, I'm ${personaName}.`;
+  const personaName = brandResult.data.persona_name?.trim() || "Charlotte";
+  const introLine = `Hey, I'm ${personaName}.`;
+  const surveyTopic =
+    brandResult.data.display_name?.trim() || surveyResult.data.title?.trim() || brandResult.data.name;
+  const purposeLine = `I'm here to run a short survey about ${surveyTopic}.`;
   const firstQuestion = questionsResult.data?.[0]?.question_text?.trim();
   const welcomeBody = brandResult.data.welcome_body?.trim();
   const firstMessage = firstQuestion
-    ? `${introLine} ${firstQuestion}`
+    ? `${introLine} ${purposeLine} ${firstQuestion}`
     : welcomeBody
-      ? `${introLine} ${welcomeBody}`
-      : introLine;
+      ? `${introLine} ${purposeLine} ${welcomeBody}`
+      : `${introLine} ${purposeLine}`;
 
   const elevenLabsAgentId = env.ELEVENLABS_AGENT_ID;
   if (!elevenLabsAgentId) {

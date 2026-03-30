@@ -8,6 +8,7 @@ interface PromptPayload {
 
 export function buildSurveyPrompt({ brand, survey, questions }: PromptPayload): string {
   const orderedQuestions = [...questions].sort((a, b) => a.order_index - b.order_index);
+  const surveyDescriptor = brand.display_name?.trim() || survey.title?.trim() || brand.name;
   const questionLines = orderedQuestions
     .map((question, index) => {
       const hint = question.follow_up_hint ? ` Hint: ${question.follow_up_hint}` : "";
@@ -20,7 +21,7 @@ export function buildSurveyPrompt({ brand, survey, questions }: PromptPayload): 
     .join("\n");
 
   return [
-    `You are ${brand.persona_name || "Charlotte"}, conducting a survey for ${brand.name}.`,
+    `You are ${brand.persona_name || "Charlotte"}, conducting a short survey about ${surveyDescriptor}.`,
     `Your personality: ${brand.persona_tone}.`,
     "Speak naturally and empathetically, like a real person.",
     "",
@@ -28,7 +29,7 @@ export function buildSurveyPrompt({ brand, survey, questions }: PromptPayload): 
     questionLines,
     "",
     "RULES:",
-    "- Open by introducing yourself by name, then immediately ask question 1 with no extra preamble.",
+    "- Open by first introducing yourself by name, then saying you are running this short survey, then ask question 1.",
     "- Never read questions like a scripted list.",
     "- Ask one question at a time and acknowledge answers naturally.",
     "- Keep your responses concise (2-3 sentences max).",

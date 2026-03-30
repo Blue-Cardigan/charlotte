@@ -48,7 +48,6 @@ export function ConversationPage() {
   const [hasEnded, setHasEnded] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState(10);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [termsOpen, setTermsOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const wasPausedRef = useRef(false);
 
@@ -234,27 +233,6 @@ export function ConversationPage() {
     };
   }, [isPaused, started, hasEnded, status, sendUserActivity]);
 
-  useEffect(() => {
-    if (!termsOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setTermsOpen(false);
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [termsOpen]);
-
   if (state.status === "loading") {
     return <div className="mobile-frame mobile-frame--center">Preparing conversation...</div>;
   }
@@ -353,42 +331,24 @@ export function ConversationPage() {
         <p className="charlotte-footer">
           Charlotte is a conversational AI research tool. <br />
           By continuing, you agree to our{" "}
-          <button
-            type="button"
+          <a
             className="charlotte-link charlotte-link--subtle"
-            onClick={() => setTermsOpen(true)}
+            href="https://odd-rise-5e7.notion.site/Charlotte-Terms-of-Service-333255150cd58078927df28720b365ea"
+            target="_blank"
+            rel="noreferrer"
           >
             Terms of Service
-          </button>
-        </p>
-
-        {termsOpen ? (
-          <div
-            className="charlotte-overlay"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="charlotte-terms-title"
-            onClick={() => setTermsOpen(false)}
+          </a>{" "}
+          and{" "}
+          <a
+            className="charlotte-link charlotte-link--subtle"
+            href="https://odd-rise-5e7.notion.site/Charlotte-Privacy-Policy-333255150cd580e09921e56db34360a7"
+            target="_blank"
+            rel="noreferrer"
           >
-            <div className="charlotte-overlay-panel" onClick={(event) => event.stopPropagation()}>
-              <button
-                type="button"
-                className="charlotte-overlay-close"
-                aria-label="Close terms"
-                onClick={() => setTermsOpen(false)}
-              >
-                ×
-              </button>
-
-              <h2 id="charlotte-terms-title" className="charlotte-overlay-title">
-                Terms of Service
-              </h2>
-              <p className="charlotte-overlay-copy">
-                Placeholder text: add final Terms of Service content here once legal copy is ready.
-              </p>
-            </div>
-          </div>
-        ) : null}
+            Privacy Policy
+          </a>
+        </p>
       </div>
     </ThemeProvider>
   );

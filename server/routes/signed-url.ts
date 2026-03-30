@@ -58,7 +58,7 @@ signedUrlApp.get("/", async (c) => {
     questions: questionsResult.data ?? [],
   });
   const personaName = brandResult.data.persona_name;
-  const introLine = `Hey, I'm ${personaName}.`;
+  const introLine = `Hi there — I'm ${personaName}.`;
   const welcomeBody = brandResult.data.welcome_body?.trim();
   const firstMessage = welcomeBody ? `${introLine} ${welcomeBody}` : introLine;
 

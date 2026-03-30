@@ -39,11 +39,12 @@ a {
   justify-items: center;
   text-align: center;
   min-height: 100%;
-  padding: 18px 0;
+  row-gap: clamp(20px, 4vh, 42px);
+  padding: clamp(24px, 6vh, 56px) 0;
 }
 
 .charlotte-content > .charlotte-header {
-  align-self: end;
+  align-self: start;
 }
 
 .charlotte-content > .charlotte-video-wrap {
@@ -53,7 +54,7 @@ a {
 .charlotte-content > .charlotte-controls,
 .charlotte-content > .charlotte-thanks {
   grid-row: 3;
-  align-self: start;
+  align-self: end;
 }
 
 .charlotte-header {
@@ -118,6 +119,12 @@ a {
   cursor: pointer;
 }
 
+.charlotte-link--subtle {
+  color: var(--brand-text-soft);
+  font-size: 11px;
+  opacity: 0.9;
+}
+
 .charlotte-timer {
   margin: 0;
   font-size: 13px;
@@ -140,6 +147,53 @@ a {
   text-align: center;
   font-size: 10px;
   line-height: 1.5;
+  color: var(--brand-text-soft);
+}
+
+.charlotte-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: color-mix(in oklab, black 36%, transparent);
+}
+
+.charlotte-overlay-panel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--brand-background);
+  color: var(--brand-text);
+  padding:
+    calc(56px + env(safe-area-inset-top, 0px))
+    24px
+    calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+.charlotte-overlay-close {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: 14px;
+  border: 0;
+  background: transparent;
+  color: var(--brand-text);
+  font-size: 32px;
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.charlotte-overlay-title {
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.charlotte-overlay-copy {
+  margin: 0;
+  max-width: 720px;
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--brand-text-soft);
 }
 

@@ -6,6 +6,7 @@ import { useConversation } from "../../hooks/useConversation";
 import { useCountdownTimer } from "../../hooks/useCountdownTimer";
 import { apiFetch } from "../../lib/api";
 import { getSourceTrackingPayload } from "../../lib/sourceTracking";
+import squareWebm from "../../lib/Square.webm";
 import squareVideo from "../../lib/Square.mp4";
 import squarePoster from "../../lib/Square-first-frame.jpg";
 
@@ -47,6 +48,7 @@ export function ConversationPage() {
   const [hasEnded, setHasEnded] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState(10);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [termsOpen, setTermsOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const wasPausedRef = useRef(false);
 
@@ -232,6 +234,27 @@ export function ConversationPage() {
     };
   }, [isPaused, started, hasEnded, status, sendUserActivity]);
 
+  useEffect(() => {
+    if (!termsOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setTermsOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [termsOpen]);
+
   if (state.status === "loading") {
     return <div className="mobile-frame mobile-frame--center">Preparing conversation...</div>;
   }
@@ -260,13 +283,15 @@ export function ConversationPage() {
             <video
               ref={videoRef}
               className="charlotte-video"
-              src={squareVideo}
               poster={squarePoster}
               muted
               loop
               playsInline
-              preload="auto"
-            />
+              preload="metadata"
+            >
+              <source src={squareWebm} type="video/webm" />
+              <source src={squareVideo} type="video/mp4" />
+            </video>
           </div>
 
           {uiState !== "ended" ? (
@@ -303,19 +328,22 @@ export function ConversationPage() {
                   >
                     Continue
                   </button>
-                  <button
-                    type="button"
-                    className="charlotte-link"
-                    onClick={() => void finishConversation()}
-                    disabled={ending}
-                  >
-                    {ending ? "Ending..." : "End Conversation"}
-                  </button>
                 </>
               ) : null}
 
               {visibleError ? <p className="charlotte-error">{visibleError}</p> : null}
-              <p className="charlotte-timer">{formattedTime}</p>
+              {uiState === "paused" ? (
+                <button
+                  type="button"
+                  className="charlotte-link charlotte-link--subtle"
+                  onClick={() => void finishConversation()}
+                  disabled={ending}
+                >
+                  {ending ? "Ending..." : "End Conversation"}
+                </button>
+              ) : (
+                <p className="charlotte-timer">{formattedTime}</p>
+              )}
             </div>
           ) : (
             <p className="charlotte-thanks">Thank You</p>
@@ -323,8 +351,44 @@ export function ConversationPage() {
         </div>
 
         <p className="charlotte-footer">
-          Charlotte is a conversational AI research tool. By continuing, you agree to our Terms of Service.
+          Charlotte is a conversational AI research tool. <br />
+          By continuing, you agree to our{" "}
+          <button
+            type="button"
+            className="charlotte-link charlotte-link--subtle"
+            onClick={() => setTermsOpen(true)}
+          >
+            Terms of Service
+          </button>
         </p>
+
+        {termsOpen ? (
+          <div
+            className="charlotte-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="charlotte-terms-title"
+            onClick={() => setTermsOpen(false)}
+          >
+            <div className="charlotte-overlay-panel" onClick={(event) => event.stopPropagation()}>
+              <button
+                type="button"
+                className="charlotte-overlay-close"
+                aria-label="Close terms"
+                onClick={() => setTermsOpen(false)}
+              >
+                ×
+              </button>
+
+              <h2 id="charlotte-terms-title" className="charlotte-overlay-title">
+                Terms of Service
+              </h2>
+              <p className="charlotte-overlay-copy">
+                Placeholder text: add final Terms of Service content here once legal copy is ready.
+              </p>
+            </div>
+          </div>
+        ) : null}
       </div>
     </ThemeProvider>
   );

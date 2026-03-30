@@ -335,7 +335,7 @@ export function ConversationPage() {
               {uiState === "paused" ? (
                 <button
                   type="button"
-                  className="charlotte-link charlotte-link--subtle"
+                  className="charlotte-link charlotte-link--subtle charlotte-end-action"
                   onClick={() => void finishConversation()}
                   disabled={ending}
                 >

@@ -28,7 +28,7 @@ export function buildSurveyPrompt({ brand, survey, questions }: PromptPayload): 
     questionLines,
     "",
     "RULES:",
-    "- Open the conversation by introducing yourself by name before asking any survey question.",
+    "- Open by introducing yourself by name, then immediately ask question 1 with no extra preamble.",
     "- Never read questions like a scripted list.",
     "- Ask one question at a time and acknowledge answers naturally.",
     "- Keep your responses concise (2-3 sentences max).",

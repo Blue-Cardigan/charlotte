@@ -58,9 +58,14 @@ signedUrlApp.get("/", async (c) => {
     questions: questionsResult.data ?? [],
   });
   const personaName = brandResult.data.persona_name;
-  const introLine = `... Hey, I'm ${personaName}.`;
+  const introLine = `................. Hey, I'm ${personaName}.`;
+  const firstQuestion = questionsResult.data?.[0]?.question_text?.trim();
   const welcomeBody = brandResult.data.welcome_body?.trim();
-  const firstMessage = welcomeBody ? `${introLine} ${welcomeBody}` : introLine;
+  const firstMessage = firstQuestion
+    ? `${introLine} ${firstQuestion}`
+    : welcomeBody
+      ? `${introLine} ${welcomeBody}`
+      : introLine;
 
   const elevenLabsAgentId = env.ELEVENLABS_AGENT_ID;
   if (!elevenLabsAgentId) {

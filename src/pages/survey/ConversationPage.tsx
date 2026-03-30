@@ -23,17 +23,17 @@ interface SignedUrlResult {
 
 type UiState = "idle" | "error" | "active" | "paused" | "ended";
 
-function primeMicrophoneAccess() {
-  if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-    return Promise.resolve();
-  }
-  return navigator.mediaDevices
-    .getUserMedia({ audio: true })
-    .then((stream) => {
-      stream.getTracks().forEach((track) => track.stop());
-    })
-    .catch(() => undefined);
-}
+/**
+ * On iOS, the AudioContext created by the SDK needs time to fully resume after
+ * the user gesture that triggers session start. Without a delay, the first
+ * audio chunks arrive before playback is ready, clipping the opening words.
+ * Android already ships with a 3 000 ms default in the SDK; iOS has none.
+ */
+const CONNECTION_DELAY = {
+  default: 0,
+  android: 3_000,
+  ios: 1_500,
+};
 
 export function ConversationPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -114,7 +114,6 @@ export function ConversationPage() {
     setEnding(false);
     setConnecting(true);
     try {
-      await primeMicrophoneAccess();
       const sourcePayload = getSourceTrackingPayload(searchParams, location.pathname);
       const signedUrlParams = new URLSearchParams({
         survey_id: payload.survey.id,
@@ -136,6 +135,7 @@ export function ConversationPage() {
       await start({
         signedUrl: signed.signedUrl,
         overrides: signed.overrides,
+        connectionDelay: CONNECTION_DELAY,
       });
       setStarted(true);
     } catch (startError) {

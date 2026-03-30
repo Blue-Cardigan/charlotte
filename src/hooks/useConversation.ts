@@ -15,6 +15,7 @@ type StartSessionOptions = Parameters<typeof Conversation.startSession>[0];
 interface StartSessionInput {
   signedUrl: string;
   overrides?: StartSessionOptions["overrides"];
+  connectionDelay?: StartSessionOptions["connectionDelay"];
 }
 
 type ConversationSession = Awaited<ReturnType<typeof Conversation.startSession>>;
@@ -61,7 +62,7 @@ export function useConversation() {
   }, [appendMessage]);
 
   const start = useCallback(
-    async ({ signedUrl, overrides }: StartSessionInput) => {
+    async ({ signedUrl, overrides, connectionDelay }: StartSessionInput) => {
       setError(null);
       setMode("listening");
       setStatus("connecting");
@@ -77,6 +78,7 @@ export function useConversation() {
         const created = await Conversation.startSession({
           signedUrl,
           overrides,
+          connectionDelay,
           onConnect: ({ conversationId: id }: { conversationId: string }) => {
             setConversationId(id);
             appendMessage({

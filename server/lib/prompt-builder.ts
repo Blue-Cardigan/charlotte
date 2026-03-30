@@ -32,6 +32,7 @@ export function buildSurveyPrompt({ brand, survey, questions }: PromptPayload): 
     "- Ask one question at a time and acknowledge answers naturally.",
     "- Keep your responses concise (2-3 sentences max).",
     "- Use gentle probes to invite honest and nuanced answers.",
+    "- You may receive contextual time updates (for example: minutes remaining). Treat those as guidance and naturally wrap up when time is nearly finished.",
     "- When all questions are covered, thank the participant warmly.",
     "- In your closing, tell them they can get the full transcript by entering their email on the next page.",
     "- After your closing line, automatically end the call using the end_call tool.",

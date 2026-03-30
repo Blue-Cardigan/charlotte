@@ -20,6 +20,7 @@ export function SurveyEditorPage() {
     title: "",
     slug: "",
     status: "draft" as "draft" | "active" | "closed",
+    duration_minutes: 10,
   });
   const [newQuestion, setNewQuestion] = useState({
     question_text: "",
@@ -86,6 +87,22 @@ export function SurveyEditorPage() {
             className="input"
             value={newSurvey.slug}
             onChange={(event) => setNewSurvey((prev) => ({ ...prev, slug: event.target.value }))}
+          />
+        </label>
+        <label>
+          <small className="muted">Duration (minutes)</small>
+          <input
+            className="input"
+            type="number"
+            min={1}
+            max={120}
+            value={newSurvey.duration_minutes}
+            onChange={(event) =>
+              setNewSurvey((prev) => ({
+                ...prev,
+                duration_minutes: Number(event.target.value) || 10,
+              }))
+            }
           />
         </label>
         <button

@@ -111,6 +111,7 @@ signedUrlApp.get("/", async (c) => {
   return c.json({
     signedUrl: signedUrlPayload.signed_url,
     sessionId: sessionInsert.data.id,
+    durationMinutes: surveyResult.data.duration_minutes ?? 10,
     overrides: {
       agent: {
         prompt: {

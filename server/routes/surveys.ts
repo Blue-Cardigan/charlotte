@@ -11,6 +11,7 @@ const surveySchema = z.object({
   slug: z.string().min(2),
   description: z.string().nullable().optional(),
   status: z.enum(["draft", "active", "closed"]).default("draft"),
+  duration_minutes: z.number().int().min(1).max(120).default(10),
   extra_context: z.string().nullable().optional(),
 });
 

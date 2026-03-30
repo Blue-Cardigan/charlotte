@@ -1,8 +1,6 @@
 import { FormEvent, useState } from "react";
-import { Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { WelcomePage } from "./pages/survey/WelcomePage";
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ConversationPage } from "./pages/survey/ConversationPage";
-import { ThankYouPage } from "./pages/survey/ThankYouPage";
 import { LoginPage } from "./pages/admin/LoginPage";
 import { DashboardPage } from "./pages/admin/DashboardPage";
 import { BrandsPage } from "./pages/admin/BrandsPage";
@@ -18,7 +16,7 @@ function SurveyParamRedirect() {
   const trackingQuery = getTrackingQueryString(params);
 
   if (surveySlug) {
-    return <Navigate replace to={`/survey/${encodeURIComponent(surveySlug)}/welcome${trackingQuery}`} />;
+    return <Navigate replace to={`/survey/${encodeURIComponent(surveySlug)}${trackingQuery}`} />;
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -27,7 +25,7 @@ function SurveyParamRedirect() {
     if (!slug) {
       return;
     }
-    navigate(`/survey/${encodeURIComponent(slug)}/welcome${trackingQuery}`);
+    navigate(`/survey/${encodeURIComponent(slug)}${trackingQuery}`);
   };
 
   return (
@@ -51,14 +49,24 @@ function RootRedirect() {
   return <Navigate replace to="/" />;
 }
 
+function LegacySurveyRedirect() {
+  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  if (!slug) {
+    return <Navigate replace to="/" />;
+  }
+  return <Navigate replace to={`/survey/${encodeURIComponent(slug)}${location.search}`} />;
+}
+
 export function App() {
   return (
     <div className="app-shell">
       <Routes>
         <Route path="/" element={<RootRedirect />} />
-        <Route path="/survey/:slug/welcome" element={<WelcomePage />} />
-        <Route path="/survey/:slug/chat" element={<ConversationPage />} />
-        <Route path="/survey/:slug/thanks" element={<ThankYouPage />} />
+        <Route path="/survey/:slug" element={<ConversationPage />} />
+        <Route path="/survey/:slug/welcome" element={<LegacySurveyRedirect />} />
+        <Route path="/survey/:slug/chat" element={<LegacySurveyRedirect />} />
+        <Route path="/survey/:slug/thanks" element={<LegacySurveyRedirect />} />
         <Route path="/admin" element={<LoginPage />} />
         <Route path="/admin/dashboard" element={<DashboardPage />} />
         <Route path="/admin/brands" element={<BrandsPage />} />

@@ -26,6 +26,7 @@ export interface Survey {
   slug: string;
   description: string | null;
   status: "draft" | "active" | "closed";
+  duration_minutes: number;
   extra_context: string | null;
   created_at: string;
 }

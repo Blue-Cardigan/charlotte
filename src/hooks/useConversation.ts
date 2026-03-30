@@ -27,6 +27,7 @@ export function useConversation() {
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [liveAssistantText, setLiveAssistantText] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
   const sessionRef = useRef<ConversationSession | null>(null);
   const liveAssistantTextRef = useRef("");
 
@@ -65,6 +66,7 @@ export function useConversation() {
       setMode("listening");
       setStatus("connecting");
       setConversationId(null);
+      setIsPaused(false);
       liveAssistantTextRef.current = "";
       setLiveAssistantText("");
       const existingSession = sessionRef.current;
@@ -92,6 +94,7 @@ export function useConversation() {
             setSession(null);
             setStatus("disconnected");
             setMode("ended");
+            setIsPaused(false);
             const info = details as { reason?: string; message?: string; closeReason?: string } | undefined;
             if (info?.reason === "error") {
               setError(info.message ?? info.closeReason ?? "Voice connection closed unexpectedly.");
@@ -146,6 +149,7 @@ export function useConversation() {
       } catch (err) {
         setStatus("disconnected");
         setMode("error");
+        setIsPaused(false);
         setError(err instanceof Error ? err.message : "Unable to start voice session.");
         throw err;
       }
@@ -164,6 +168,7 @@ export function useConversation() {
     setSession(null);
     setStatus("disconnected");
     setMode("ended");
+    setIsPaused(false);
   }, [flushLiveAssistantText]);
 
   const addFallbackUserMessage = useCallback((text: string) => {
@@ -200,6 +205,34 @@ export function useConversation() {
     activeSession.setVolume({ volume: isMuted ? 0 : 1 });
   }, []);
 
+  const pause = useCallback(async () => {
+    const activeSession = sessionRef.current;
+    if (!activeSession) {
+      return;
+    }
+    activeSession.setMicMuted(true);
+    await activeSession.setVolume({ volume: 0 });
+    setIsPaused(true);
+  }, []);
+
+  const resume = useCallback(async () => {
+    const activeSession = sessionRef.current;
+    if (!activeSession) {
+      return;
+    }
+    activeSession.setMicMuted(false);
+    await activeSession.setVolume({ volume: 1 });
+    setIsPaused(false);
+  }, []);
+
+  const sendContextualUpdate = useCallback((text: string) => {
+    const activeSession = sessionRef.current;
+    if (!activeSession || !text.trim()) {
+      return;
+    }
+    activeSession.sendContextualUpdate(text);
+  }, []);
+
   const transcript = useMemo(
     () =>
       messages.map((item) => ({
@@ -217,11 +250,15 @@ export function useConversation() {
     conversationId,
     messages,
     liveAssistantText,
+    isPaused,
     transcript,
     start,
     stop,
+    pause,
+    resume,
     setMicMuted,
     setOutputMuted,
+    sendContextualUpdate,
     addFallbackUserMessage,
   };
 }

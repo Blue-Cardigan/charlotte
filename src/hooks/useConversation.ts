@@ -233,6 +233,14 @@ export function useConversation() {
     activeSession.sendContextualUpdate(text);
   }, []);
 
+  const sendUserActivity = useCallback(() => {
+    const activeSession = sessionRef.current;
+    if (!activeSession) {
+      return;
+    }
+    activeSession.sendUserActivity();
+  }, []);
+
   const transcript = useMemo(
     () =>
       messages.map((item) => ({
@@ -259,6 +267,7 @@ export function useConversation() {
     setMicMuted,
     setOutputMuted,
     sendContextualUpdate,
+    sendUserActivity,
     addFallbackUserMessage,
   };
 }

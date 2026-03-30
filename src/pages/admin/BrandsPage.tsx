@@ -5,6 +5,7 @@ import { AdminLayout } from "./AdminLayout";
 
 const defaultBrandInput = {
   name: "",
+  display_name: "",
   slug: "",
   color_primary: "#17152f",
   color_secondary: "#2b2a4a",

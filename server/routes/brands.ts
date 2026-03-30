@@ -6,6 +6,7 @@ import { serviceSupabase } from "../lib/supabase.js";
 
 const brandInputSchema = z.object({
   name: z.string().min(2),
+  display_name: z.string().min(2).nullable().optional(),
   slug: z.string().min(2),
   logo_url: z.string().url().nullable().optional(),
   color_primary: z.string().min(4),

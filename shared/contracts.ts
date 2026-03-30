@@ -5,6 +5,7 @@ export type Role = "super_admin" | "brand_admin";
 export interface Brand {
   id: string;
   name: string;
+  display_name: string | null;
   slug: string;
   logo_url: string | null;
   color_primary: string;

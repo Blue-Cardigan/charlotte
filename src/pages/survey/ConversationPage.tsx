@@ -7,6 +7,7 @@ import { useCountdownTimer } from "../../hooks/useCountdownTimer";
 import { apiFetch } from "../../lib/api";
 import { getSourceTrackingPayload } from "../../lib/sourceTracking";
 import squareVideo from "../../lib/Square.mp4";
+import squarePoster from "../../lib/Square-first-frame.jpg";
 
 type ConversationOverrides = Parameters<
   typeof import("@elevenlabs/client").Conversation.startSession
@@ -47,6 +48,7 @@ export function ConversationPage() {
   const [durationMinutes, setDurationMinutes] = useState(10);
   const [localError, setLocalError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const wasPausedRef = useRef(false);
 
   const {
     mode,
@@ -60,6 +62,7 @@ export function ConversationPage() {
     pause,
     resume,
     sendContextualUpdate,
+    sendUserActivity,
   } = useConversation();
 
   const timerRunning =
@@ -195,13 +198,52 @@ export function ConversationPage() {
     }
   }, [uiState]);
 
+  useEffect(() => {
+    if (!started || hasEnded || status !== "connected") {
+      return;
+    }
+
+    if (isPaused && !wasPausedRef.current) {
+      sendContextualUpdate(
+        "The participant intentionally paused the conversation. Remain silent and wait until they continue.",
+      );
+      wasPausedRef.current = true;
+    }
+
+    if (!isPaused && wasPausedRef.current) {
+      sendContextualUpdate(
+        "The participant has resumed the conversation. Continue naturally from where you left off.",
+      );
+      wasPausedRef.current = false;
+    }
+  }, [isPaused, started, hasEnded, status, sendContextualUpdate]);
+
+  useEffect(() => {
+    if (!isPaused || !started || hasEnded || status !== "connected") {
+      return;
+    }
+
+    const keepAlive = window.setInterval(() => {
+      sendUserActivity();
+    }, 1500);
+
+    return () => {
+      window.clearInterval(keepAlive);
+    };
+  }, [isPaused, started, hasEnded, status, sendUserActivity]);
+
   if (state.status === "loading") {
-    return <div className="mobile-frame">Preparing conversation...</div>;
+    return <div className="mobile-frame mobile-frame--center">Preparing conversation...</div>;
   }
 
   if (state.status === "error" || !payload) {
     return <div className="mobile-frame">Unable to load survey conversation.</div>;
   }
+
+  const topicLabel =
+    payload.brand.display_name?.trim() ||
+    payload.survey.title.trim() ||
+    "AI Generated Images";
 
   return (
     <ThemeProvider brand={payload.brand}>
@@ -210,7 +252,7 @@ export function ConversationPage() {
           <div className="charlotte-header">
             <p>Hello, I&apos;m {payload.brand.persona_name}</p>
             <p>
-              Let&apos;s talk about <span>{payload.survey.title}</span>
+              Let&apos;s talk about <span>{topicLabel}</span>
             </p>
           </div>
 
@@ -219,6 +261,7 @@ export function ConversationPage() {
               ref={videoRef}
               className="charlotte-video"
               src={squareVideo}
+              poster={squarePoster}
               muted
               loop
               playsInline

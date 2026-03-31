@@ -1,0 +1,15 @@
+diff --git a/node_modules/@elevenlabs/client/dist/utils/output.js b/node_modules/@elevenlabs/client/dist/utils/output.js
+index 0c98f79..ad169c4 100644
+--- a/node_modules/@elevenlabs/client/dist/utils/output.js
++++ b/node_modules/@elevenlabs/client/dist/utils/output.js
+@@ -33,7 +33,9 @@ export class MediaDeviceOutput {
+                 await addLibsamplerateModule(context, libsampleratePath);
+             }
+             await loadAudioConcatProcessor(context.audioWorklet, workletPaths?.audioConcatProcessor);
+-            const worklet = new AudioWorkletNode(context, "audioConcatProcessor");
++            const worklet = new AudioWorkletNode(context, "audioConcatProcessor", {
++                outputChannelCount: [1],
++            });
+             worklet.port.postMessage({ type: "setFormat", format, sampleRate });
+             worklet.connect(gain);
+             await context.resume();

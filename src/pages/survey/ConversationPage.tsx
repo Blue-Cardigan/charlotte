@@ -89,6 +89,15 @@ export function ConversationPage() {
   });
 
   const visibleError = localError ?? error;
+  const userFacingError = visibleError ? "something went wrong" : null;
+
+  useEffect(() => {
+    if (!visibleError) {
+      return;
+    }
+    console.error("Conversation page error:", visibleError);
+  }, [visibleError]);
+
   const uiState: UiState = useMemo(() => {
     if (hasEnded) {
       return "ended";
@@ -309,7 +318,6 @@ export function ConversationPage() {
                 </>
               ) : null}
 
-              {visibleError ? <p className="charlotte-error">{visibleError}</p> : null}
               {uiState === "paused" ? (
                 <button
                   type="button"
@@ -319,6 +327,8 @@ export function ConversationPage() {
                 >
                   {ending ? "Ending..." : "End Conversation"}
                 </button>
+              ) : userFacingError ? (
+                <p className="charlotte-error">{userFacingError}</p>
               ) : (
                 <p className="charlotte-timer">{formattedTime}</p>
               )}

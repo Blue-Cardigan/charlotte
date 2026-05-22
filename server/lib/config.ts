@@ -2,9 +2,9 @@ import "dotenv/config";
 import { z } from "zod";
 
 const envSchema = z.object({
-  VITE_SUPABASE_URL: z.string().url(),
-  VITE_SUPABASE_ANON_KEY: z.string().min(20),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
+  SUPABASE_URL: z.string().url(),
+  VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(20),
+  SUPABASE_SECRET_KEY: z.string().min(20),
   ELEVENLABS_API_KEY: z.string().min(20),
   ELEVENLABS_AGENT_ID: z.string().min(3).optional(),
   GOOGLE_GENERATIVE_AI_API_KEY: z.string().min(20),
